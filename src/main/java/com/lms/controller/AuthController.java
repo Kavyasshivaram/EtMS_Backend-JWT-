@@ -117,39 +117,39 @@ public class AuthController {
     @Autowired
     private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
-    @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> payload) {
-
-        String email = payload.get("email");
-
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-
-        if (optionalUser.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", "User not found"));
-        }
-
-        User user = optionalUser.get();
-
-        // Generate OTP
-        String otp = String.valueOf((int)((Math.random() * 900000) + 100000));
-
-        user.setResetOtp(otp);
-        user.setResetOtpExpiry(java.time.LocalDateTime.now().plusMinutes(15));
-        userRepository.save(user);
-
-        // ✅ Send Email
-        emailService.sendOtpEmail(user.getEmail(), otp);
-
-        // ✅ Send SMS (if phone exists)
-        if (user.getPhone() != null) {
-            smsService.sendOtpSms(user.getPhone(), otp);
-        }
-
-        System.out.println("DEBUG OTP for " + email + ": " + otp);
-
-        return ResponseEntity.ok(Map.of("message", "OTP sent to email and mobile."));
-    }
+//    @PostMapping("/forgot-password")
+//    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> payload) {
+//
+//        String email = payload.get("email");
+//
+//        Optional<User> optionalUser = userRepository.findByEmail(email);
+//
+//        if (optionalUser.isEmpty()) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+//                    .body(Map.of("message", "User not found"));
+//        }
+//
+//        User user = optionalUser.get();
+//
+//        // Generate OTP
+//        String otp = String.valueOf((int)((Math.random() * 900000) + 100000));
+//
+//        user.setResetOtp(otp);
+//        user.setResetOtpExpiry(java.time.LocalDateTime.now().plusMinutes(15));
+//        userRepository.save(user);
+//
+//        // ✅ Send Email
+//        emailService.sendOtpEmail(user.getEmail(), otp);
+//
+//        // ✅ Send SMS (if phone exists)
+//        if (user.getPhone() != null) {
+//            smsService.sendOtpSms(user.getPhone(), otp);
+//        }
+//
+//        System.out.println("DEBUG OTP for " + email + ": " + otp);
+//
+//        return ResponseEntity.ok(Map.of("message", "OTP sent to email and mobile."));
+//    }
 
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> payload) {
@@ -171,6 +171,34 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "OTP Verified. Proceed to reset."));
     }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> payload) {
+
+        String email = payload.get("email");
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "User not found"));
+        }
+
+        User user = optionalUser.get();
+
+        // Generate OTP
+        String otp = String.valueOf((int)((Math.random() * 900000) + 100000));
+        user.setResetOtp(otp);
+        user.setResetOtpExpiry(java.time.LocalDateTime.now().plusMinutes(15));
+        userRepository.save(user);
+
+        // ✅ Send Email ONLY
+        emailService.sendOtpEmail(user.getEmail(), otp);
+
+        // ❌ SMS REMOVED - no Twilio account
+
+        System.out.println("DEBUG OTP for " + email + ": " + otp);
+
+        return ResponseEntity.ok(Map.of("message", "OTP sent to your email."));
+    }
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");

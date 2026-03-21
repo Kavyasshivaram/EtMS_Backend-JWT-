@@ -20,19 +20,6 @@ public class SmsServiceImpl implements SmsService {
 
     @Override
     public void sendOtpSms(String phoneNumber, String otp) {
-        try {
-            Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
-
-            Message message = Message.creator(
-                    new com.twilio.type.PhoneNumber("whatsapp:" + phoneNumber),
-                    new com.twilio.type.PhoneNumber(FROM),
-                    "Your LMS OTP is: " + otp + ". Valid for 15 minutes."
-            ).create();
-
-            System.out.println("SMS sent: " + message.getSid());
-
-        } catch (Exception e) {
-            System.err.println("SMS sending failed: " + e.getMessage());
-        }
+        //
     }
 }
