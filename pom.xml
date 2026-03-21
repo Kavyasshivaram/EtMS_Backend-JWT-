@@ -71,11 +71,6 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-    <groupId>com.twilio.sdk</groupId>
-    <artifactId>twilio</artifactId>
-    <version>9.14.1</version>
-</dependency>
 		
 		<!-- Spring Security & JWT -->
 		<dependency>
