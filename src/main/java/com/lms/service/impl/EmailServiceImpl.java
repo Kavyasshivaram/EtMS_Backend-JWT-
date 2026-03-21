@@ -12,28 +12,49 @@ public class EmailServiceImpl implements EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
+//    @Override
+//    public void sendOtpEmail(String toEmail, String otp) {
+//        try {
+//            SimpleMailMessage message = new SimpleMailMessage();
+//            message.setTo(toEmail);
+//            message.setSubject("Password Reset OTP - LMS");
+//
+//            message.setText(
+//                    "Dear User,\n\n" +
+//                    "Your OTP for password reset is: " + otp + "\n\n" +
+//                    "This OTP will expire in 15 minutes.\n\n" +
+//                    "Do not share this OTP.\n\n" +
+//                    "Regards,\nLMS Team"
+//            );
+//
+//            mailSender.send(message);
+//
+//            System.out.println("Email sent successfully to " + toEmail);
+//
+//        } catch (Exception e) {
+//            System.err.println("Email sending failed: " + e.getMessage());
+//            System.out.println("⚠️ OTP EMAIL FAILED - but flow continues");
+//        }
+//    }
     @Override
     public void sendOtpEmail(String toEmail, String otp) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(toEmail);
+            message.setFrom("kavyashivaram34@gmail.com"); // ADD THIS
             message.setSubject("Password Reset OTP - LMS");
-
             message.setText(
-                    "Dear User,\n\n" +
-                    "Your OTP for password reset is: " + otp + "\n\n" +
-                    "This OTP will expire in 15 minutes.\n\n" +
-                    "Do not share this OTP.\n\n" +
-                    "Regards,\nLMS Team"
+                "Dear User,\n\n" +
+                "Your OTP for password reset is: " + otp + "\n\n" +
+                "This OTP will expire in 15 minutes.\n\n" +
+                "Do not share this OTP.\n\n" +
+                "Regards,\nLMS Team"
             );
-
             mailSender.send(message);
-
-            System.out.println("Email sent successfully to " + toEmail);
-
+            System.out.println("✅ Email sent to " + toEmail);
         } catch (Exception e) {
-            System.err.println("Email sending failed: " + e.getMessage());
-            System.out.println("⚠️ OTP EMAIL FAILED - but flow continues");
+            e.printStackTrace(); // CHANGE THIS LINE
+            System.err.println("❌ MAIL ERROR: " + e.getClass().getName() + " - " + e.getMessage());
         }
     }
 }
