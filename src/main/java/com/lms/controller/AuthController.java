@@ -111,8 +111,7 @@ public class AuthController {
     @Autowired
     private com.lms.service.EmailService emailService;
 
-    @Autowired
-    private com.lms.service.SmsService smsService;
+ 
 
     @Autowired
     private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
