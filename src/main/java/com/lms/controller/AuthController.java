@@ -117,39 +117,39 @@ public class AuthController {
     @Autowired
     private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
-//    @PostMapping("/forgot-password")
-//    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> payload) {
-//
-//        String email = payload.get("email");
-//
-//        Optional<User> optionalUser = userRepository.findByEmail(email);
-//
-//        if (optionalUser.isEmpty()) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                    .body(Map.of("message", "User not found"));
-//        }
-//
-//        User user = optionalUser.get();
-//
-//        // Generate OTP
-//        String otp = String.valueOf((int)((Math.random() * 900000) + 100000));
-//
-//        user.setResetOtp(otp);
-//        user.setResetOtpExpiry(java.time.LocalDateTime.now().plusMinutes(15));
-//        userRepository.save(user);
-//
-//        // ✅ Send Email
-//        emailService.sendOtpEmail(user.getEmail(), otp);
-//
-//        // ✅ Send SMS (if phone exists)
-//        if (user.getPhone() != null) {
-//            smsService.sendOtpSms(user.getPhone(), otp);
-//        }
-//
-//        System.out.println("DEBUG OTP for " + email + ": " + otp);
-//
-//        return ResponseEntity.ok(Map.of("message", "OTP sent to email and mobile."));
-//    }
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> payload) {
+
+        String email = payload.get("email");
+        System.out.println("🔍 STEP 1: Received forgot-password for: " + email);
+
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "User not found"));
+        }
+
+        User user = optionalUser.get();
+        System.out.println("🔍 STEP 2: User found: " + user.getEmail());
+
+        String otp = String.valueOf((int)((Math.random() * 900000) + 100000));
+        user.setResetOtp(otp);
+        user.setResetOtpExpiry(java.time.LocalDateTime.now().plusMinutes(15));
+        userRepository.save(user);
+        System.out.println("🔍 STEP 3: OTP saved to DB: " + otp);
+
+        // Use EmailService (not direct mailSender) - keeps controller clean
+        try {
+            emailService.sendOtpEmail(user.getEmail(), otp);
+            System.out.println("✅ STEP 4: Email sent successfully to " + user.getEmail());
+        } catch (Exception e) {
+            System.err.println("❌ EMAIL FAILED: " + e.getClass().getName() + " - " + e.getMessage());
+            e.printStackTrace();
+            // Still return OK — OTP is in DB, don't block user
+        }
+
+        return ResponseEntity.ok(Map.of("message", "OTP sent to your email."));
+    }
 
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> payload) {
@@ -222,47 +222,5 @@ public class AuthController {
 
         return ResponseEntity.ok(Map.of("message", "Password reset successful. You can now login."));
     }
-    @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> payload) {
-
-        String email = payload.get("email");
-        System.out.println("🔍 STEP 1: Received forgot-password for: " + email);
-
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-        if (optionalUser.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", "User not found"));
-        }
-
-        User user = optionalUser.get();
-        System.out.println("🔍 STEP 2: User found: " + user.getEmail());
-
-        String otp = String.valueOf((int)((Math.random() * 900000) + 100000));
-        user.setResetOtp(otp);
-        user.setResetOtpExpiry(java.time.LocalDateTime.now().plusMinutes(15));
-        userRepository.save(user);
-        System.out.println("🔍 STEP 3: OTP saved to DB: " + otp);
-
-        try {
-            System.out.println("🔍 STEP 4: About to send email...");
-            System.out.println("🔍 Mail sender class: " + mailSender.getClass().getName());
-            
-            org.springframework.mail.SimpleMailMessage message = 
-                new org.springframework.mail.SimpleMailMessage();
-            message.setTo(user.getEmail());
-            message.setFrom("kavyashivaram34@gmail.com");
-            message.setSubject("Password Reset OTP - LMS");
-            message.setText("Your OTP is: " + otp + "\nExpires in 15 minutes.");
-            
-            mailSender.send(message);
-            System.out.println("✅ STEP 5: Email sent successfully to " + user.getEmail());
-            
-        } catch (Exception e) {
-            System.err.println("❌ STEP 5 FAILED: " + e.getClass().getName());
-            System.err.println("❌ Message: " + e.getMessage());
-            e.printStackTrace();
-        }
-
-        return ResponseEntity.ok(Map.of("message", "OTP sent to your email."));
-    }
+ 
 }
