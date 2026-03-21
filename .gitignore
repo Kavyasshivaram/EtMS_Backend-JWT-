@@ -1,0 +1,20 @@
+#Secret files - NEVER push these
+.env
+.env.local
+#Spring Boot
+target/ 
+*.jar
+*.war
+*.class
+#Logs
+*.log
+boot_log*.txt
+#IDE giles
+.classpath
+.project
+.settings/
+.idea/
+#Uploads
+uploads/
+.env
+src/main/resources/application.properties
