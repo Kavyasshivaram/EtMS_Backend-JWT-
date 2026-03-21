@@ -58,7 +58,7 @@ public class SecurityConfig {
     public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
         System.out.println("CORS_CONFIG: Initializing CorsConfigurationSource [v5 - Specific Origin]...");
         org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
-        configuration.setAllowedOrigins(java.util.List.of("http://localhost:5173", "http://localhost:3000")); 
+        configuration.setAllowedOrigins(java.util.List.of("http://localhost:5173", "http://localhost:3000","https://etms-frontend-wheat.vercel.app")); 
         configuration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(java.util.List.of("Authorization", "Cache-Control", "Content-Type"));
         configuration.setExposedHeaders(java.util.List.of("Authorization"));
