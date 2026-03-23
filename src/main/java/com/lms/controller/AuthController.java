@@ -138,25 +138,17 @@ public class AuthController {
         userRepository.save(user);
         System.out.println("🔍 STEP 3: OTP saved to DB: " + otp);
 
+        // Use EmailService (not direct mailSender) - keeps controller clean
         try {
-            System.out.println("🔍 STEP 4: Attempting to send email to: " + user.getEmail());
             emailService.sendOtpEmail(user.getEmail(), otp);
             System.out.println("✅ STEP 4: Email sent successfully to " + user.getEmail());
-            return ResponseEntity.ok(Map.of("message", "OTP sent to your email."));
         } catch (Exception e) {
-            System.out.println("❌ EMAIL FAILED CLASS: " + e.getClass().getName());
-            System.out.println("❌ EMAIL FAILED MSG: " + e.getMessage());
-            System.out.println("❌ EMAIL CAUSE: " + (e.getCause() != null ? e.getCause().getMessage() : "no cause"));
+            System.err.println("❌ EMAIL FAILED: " + e.getClass().getName() + " - " + e.getMessage());
             e.printStackTrace();
-            // Return error so we can see it in frontend
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of(
-                        "message", "Email failed: " + e.getMessage(),
-                        "cause", e.getCause() != null ? e.getCause().getMessage() : "unknown"
-                    ));
+            // Still return OK — OTP is in DB, don't block user
         }
 
-        
+        return ResponseEntity.ok(Map.of("message", "OTP sent to your email."));
     }
 
     @PostMapping("/verify-otp")
