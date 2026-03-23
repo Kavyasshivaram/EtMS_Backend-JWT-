@@ -138,17 +138,25 @@ public class AuthController {
         userRepository.save(user);
         System.out.println("🔍 STEP 3: OTP saved to DB: " + otp);
 
-        // Use EmailService (not direct mailSender) - keeps controller clean
         try {
+            System.out.println("🔍 STEP 4: Attempting to send email to: " + user.getEmail());
             emailService.sendOtpEmail(user.getEmail(), otp);
             System.out.println("✅ STEP 4: Email sent successfully to " + user.getEmail());
+            return ResponseEntity.ok(Map.of("message", "OTP sent to your email."));
         } catch (Exception e) {
-            System.err.println("❌ EMAIL FAILED: " + e.getClass().getName() + " - " + e.getMessage());
+            System.out.println("❌ EMAIL FAILED CLASS: " + e.getClass().getName());
+            System.out.println("❌ EMAIL FAILED MSG: " + e.getMessage());
+            System.out.println("❌ EMAIL CAUSE: " + (e.getCause() != null ? e.getCause().getMessage() : "no cause"));
             e.printStackTrace();
-            // Still return OK — OTP is in DB, don't block user
+            // Return error so we can see it in frontend
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                        "message", "Email failed: " + e.getMessage(),
+                        "cause", e.getCause() != null ? e.getCause().getMessage() : "unknown"
+                    ));
         }
 
-        return ResponseEntity.ok(Map.of("message", "OTP sent to your email."));
+        
     }
 
     @PostMapping("/verify-otp")
@@ -171,34 +179,7 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "OTP Verified. Proceed to reset."));
     }
 
-//    @PostMapping("/forgot-password")
-//    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> payload) {
-//
-//        String email = payload.get("email");
-//        Optional<User> optionalUser = userRepository.findByEmail(email);
-//
-//        if (optionalUser.isEmpty()) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                    .body(Map.of("message", "User not found"));
-//        }
-//
-//        User user = optionalUser.get();
-//
-//        // Generate OTP
-//        String otp = String.valueOf((int)((Math.random() * 900000) + 100000));
-//        user.setResetOtp(otp);
-//        user.setResetOtpExpiry(java.time.LocalDateTime.now().plusMinutes(15));
-//        userRepository.save(user);
-//
-//        // ✅ Send Email ONLY
-//        emailService.sendOtpEmail(user.getEmail(), otp);
-//
-//        // ❌ SMS REMOVED - no Twilio account
-//
-//        System.out.println("DEBUG OTP for " + email + ": " + otp);
-//
-//        return ResponseEntity.ok(Map.of("message", "OTP sent to your email."));
-//    }
+
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
